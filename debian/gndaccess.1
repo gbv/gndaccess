@@ -16,18 +16,15 @@ sudo\ service\ gndaccess\ {status|start|stop|restart}
 .PP
 This applications provices a web service to access GND records via HTTP
 in different formats.
+The format must be provided with URL query parameter \f[C]format\f[].
 .PP
 The current draft only supports aREF format (RDF in JSON for easy
-access, similar to JSON\-LD).
+access, similar to JSON\-LD) with \f[C]format=aref\f[].
 .PP
 All JSON\-based formats can also be returned in JSONP with the
 \f[C]callback\f[] parameter:
-.IP
-.nf
-\f[C]
-/4021477\-1?format=aref&callback=abc
-\f[]
-.fi
+.IP \[bu] 2
+<http://localhost:6699/4021477-1?format=aref&callback=abc>
 .PP
 Cross\-Origin Resource Sharing (CORS) also supported, so JSONP should
 not be required.
@@ -38,7 +35,8 @@ The application is packaged as Debian package and installed at
 Log files are located at \f[C]/var/log/gndaccess/\f[].
 .SH CONFIGURATION
 .PP
-See \f[C]/etc/default/gndaccess\f[] for basic configuration (port).
+See \f[C]/etc/default/gndaccess\f[] for basic configuration (port
+number).
 Restart is needed after changes.
 .SH SEE ALSO
 .PP

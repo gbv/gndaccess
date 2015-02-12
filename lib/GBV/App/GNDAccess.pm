@@ -16,7 +16,6 @@ sub prepare_app {
     $self->{app} ||= builder {
         enable 'CrossOrigin', origins => '*';
         enable 'JSONP';
-        # TODO: jsonp
         sub { $self->main(@_) }
     }; 
 }
@@ -44,29 +43,34 @@ sub main {
     # TODO: validate $id
 
     # TODO: Content negotiation
-    my $format = $req->param('format');
-
-    say "# FORMAT: $format\n";
+    my $format = $req->param('format') || 'html';
 
     # MARCXML
     # my $url = "http://d-nb.info/04021477X/about/marcxml"
 
+    # TODO: use Plack::App::unAPI ?
+    
     my $url = "http://d-nb.info/gnd/$id";
     my $model = RDF::Trine::Model->new;
     eval {
         RDF::Trine::Parser->parse_url_into_model( $url, $model );
     };
-    if ($@) {
+    if ($@ || !$model->size) {
         return [404,[],["GND $id not found"]];
     }
 
-    say "# SIZE: ". $model->size;
+    if ($format eq 'aref') {
+        my $aref = encode_aref $model;
+        my $JSON = $req->param('pretty') ? JSON->new->pretty : JSON->new;
+        my $json = $JSON->encode( $aref );
+        return [200, ['Content-Type' => 'application/json'], [$json]];
+    } 
+    
+    if ($format eq 'html') {
+        return [200, ['Content-Type' => 'text/plain'], ['GND gefunden (probier mal format=aref!)']];
+    }
 
-    my $aref = encode_aref $model;
-
-    my $json = encode_json( $aref );
-
-    return [200, ['Content-Type' => 'application/json'], [$json]];
+    return [400, ['Content-Type' => 'text/plain'], ['format not supported']];
 }
 
 1;

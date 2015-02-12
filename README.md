@@ -13,15 +13,16 @@ The application is automatically started as service, listening on port 6699.
 # DESCRIPTION
 
 This applications provices a web service to access GND records via HTTP in
-different formats.
+different formats. The format must be provided with URL query parameter
+`format`.
 
 The current draft only supports aREF format (RDF in JSON for easy access,
-similar to JSON-LD).
+similar to JSON-LD) with `format=aref`.
 
 All JSON-based formats can also be returned in JSONP with the `callback`
 parameter:
 
-    /4021477-1?format=aref&callback=abc
+* <http://localhost:6699/4021477-1?format=aref&callback=abc>
 
 Cross-Origin Resource Sharing (CORS) also supported, so JSONP should not be
 required.
@@ -33,8 +34,8 @@ The application is packaged as Debian package and installed at
 
 # CONFIGURATION
 
-See `/etc/default/gndaccess` for basic configuration (port). Restart is needed
-after changes. 
+See `/etc/default/gndaccess` for basic configuration (port number). Restart is
+needed after changes. 
 
 # SEE ALSO
 
