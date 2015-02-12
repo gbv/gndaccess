@@ -1,0 +1,48 @@
+.TH "GNDACCESS" "1" "" "Manual" ""
+.SH NAME
+.PP
+gndaccess \- Access GND records via HTTP
+.SH SYNOPSIS
+.PP
+The application is automatically started as service, listening on port
+6699.
+.IP
+.nf
+\f[C]
+sudo\ service\ gndaccess\ {status|start|stop|restart}
+\f[]
+.fi
+.SH DESCRIPTION
+.PP
+This applications provices a web service to access GND records via HTTP
+in different formats.
+.PP
+The current draft only supports aREF format (RDF in JSON for easy
+access, similar to JSON\-LD).
+.PP
+All JSON\-based formats can also be returned in JSONP with the
+\f[C]callback\f[] parameter:
+.IP
+.nf
+\f[C]
+/4021477\-1?format=aref&callback=abc
+\f[]
+.fi
+.PP
+Cross\-Origin Resource Sharing (CORS) also supported, so JSONP should
+not be required.
+.SH INSTALLATION
+.PP
+The application is packaged as Debian package and installed at
+\f[C]/srv/gndaccess/\f[].
+Log files are located at \f[C]/var/log/gndaccess/\f[].
+.SH CONFIGURATION
+.PP
+See \f[C]/etc/default/gndaccess\f[] for basic configuration (port).
+Restart is needed after changes.
+.SH SEE ALSO
+.PP
+Changelog is located in \f[C]debian/changelog\f[] in the source code
+repository.
+.PP
+Source code and issue tracker at <https://github.com/gbv/gndaccess>

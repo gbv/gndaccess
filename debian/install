@@ -1,0 +1,5 @@
+cpanfile            srv/gndaccess
+cpanfile.snapshot   srv/gndaccess
+bin/*               srv/gndaccess/bin
+lib/*               srv/gndaccess/lib
+local/*             srv/gndaccess/local
