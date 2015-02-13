@@ -1,0 +1,8 @@
+#!/bin/sh
+
+PACKAGE="$DPKG_MAINTSCRIPT_PACKAGE"
+
+# don't complain if this fails
+invoke-rc.d $PACKAGE stop
+
+exit 0
