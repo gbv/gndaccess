@@ -6,7 +6,7 @@ debian/files
 debian/*.debhelper.log
 debian/*.debhelper
 debian/*.substvars
-debian/*.1
+#debian/*.1
 debian/*/
 *.changes
 *.deb
