@@ -1,4 +1,4 @@
-app.psgi            srv/gndaccess/app.psgi
+app.psgi            srv/gndaccess
 lib/*               srv/gndaccess/lib
 cpanfile            srv/gndaccess
 cpanfile.snapshot   srv/gndaccess

@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 PACKAGE="$DPKG_MAINTSCRIPT_PACKAGE"
 
@@ -16,7 +15,7 @@ case "$1" in
     ;;
 
     *)
-        echo "postinst called with unknown argument $1" >&2
+        echo "preinst called with unknown argument $1" >&2
         exit 1
     ;;
 esac
