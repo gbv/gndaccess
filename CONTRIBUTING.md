@@ -50,5 +50,5 @@ Finally build a Debian package for release:
 
     $ make release-file
 
-The build will produce a valid Debian package but fail unless the git
-repository is clean.
+The build will produce a valid Debian package but should fail if the git
+repository is not clean.

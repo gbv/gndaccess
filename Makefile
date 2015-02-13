@@ -36,7 +36,7 @@ release-file: documentation version
 	carton exec prove -Ilib
 	dpkg-buildpackage -b -us -uc -rfakeroot
 	mv ../$(RELEASE) .
-	git diff-index --quiet HEAD
+	git diff-index HEAD # FIXME?
 
 # do cleanup
 debian-clean:
