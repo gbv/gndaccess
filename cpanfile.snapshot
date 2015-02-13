@@ -411,6 +411,21 @@ DISTRIBUTIONS
       perl 5.008
       strict 0
       warnings 0
+  Plack-Middleware-Rewrite-1.010
+    pathname: A/AR/ARISTOTLE/Plack-Middleware-Rewrite-1.010.tar.gz
+    provides:
+      Plack::Middleware::Rewrite 1.010
+    requirements:
+      ExtUtils::MakeMaker 0
+      Plack 0.9942
+      Plack::Middleware 0
+      Plack::Request 0
+      Plack::Util 0
+      Plack::Util::Accessor 0
+      parent 0
+      perl 5.006
+      strict 0
+      warnings 0
   Plack-Middleware-XForwardedFor-0.103060
     pathname: G/GB/GBARR/Plack-Middleware-XForwardedFor-0.103060.tar.gz
     provides:

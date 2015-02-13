@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 
 PACKAGE="$DPKG_MAINTSCRIPT_PACKAGE"
 CARTON=/usr/local/bin/carton

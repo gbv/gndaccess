@@ -1,7 +1,7 @@
 package GBV::App::GNDAccess;
 use v5.14.1;
 
-our $VERSION="0.0.1";
+our $VERSION="0.0.2";
 our $NAME="gndaccess";
 
 use RDF::aREF;
@@ -32,9 +32,15 @@ sub prepare_app {
 
     $self->config( grep { -f $_ } "debian/$NAME.default", "/etc/default/$NAME" );
     $self->{app} = builder {
-        enable_if { $self->{PROXY} } 'XForwardedFor',
-            trust => $self->{TRUST};
+        enable_if { $self->{PROXY} } 'XForwardedFor', trust => $self->{TRUST};
         enable 'CrossOrigin', origins => '*';
+        enable 'Rewrite', rules => sub {
+            s{^/$}{/index.html};
+            return;
+        };
+        enable 'Static', path => qr{\.(html|js|ico|css|png)},
+            pass_through => 1, root => './htdocs';
+
         enable 'JSONP';
         sub { $self->main(@_) }
     }; 

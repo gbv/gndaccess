@@ -3,3 +3,4 @@ lib/*               srv/gndaccess/lib
 cpanfile            srv/gndaccess
 cpanfile.snapshot   srv/gndaccess
 local/*             srv/gndaccess/local
+htdocs/*            srv/gndaccess/htdocs
