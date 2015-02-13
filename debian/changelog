@@ -1,3 +1,11 @@
+gndaccess (0.0.1) unstable; urgency=medium
+
+  * log client IPs if put behind a HTTP proxy
+  * fixed postrm script
+  * refactored development toolchain, moved app.psgi to root
+
+ -- Jakob Voß <jakob.voss@gbv.de>  Fri, 13 Feb 2015 11:05:28 +0100
+
 gndaccess (0.0.0) unstable; urgency=medium
 
   * inital draft

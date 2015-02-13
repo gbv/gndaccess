@@ -26,7 +26,7 @@ start () {
         --workers $WORKERS --port $PORT --user $PACKAGE \
         --error-log /var/log/$PACKAGE/error.log \
         --access-log /var/log/$PACKAGE/access.log \
-        /srv/$PACKAGE/bin/app.psgi
+        /srv/$PACKAGE/app.psgi
     retval=$?
     if [ $retval -eq 0 ]; then
         echo "done"

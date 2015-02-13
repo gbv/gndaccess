@@ -1,19 +1,39 @@
 package GBV::App::GNDAccess;
 use v5.14.1;
 
+our $VERSION="0.0.1";
+our $NAME="gndaccess";
+
 use RDF::aREF;
 use RDF::Trine;
 use JSON;
 
-use Plack::Builder;#?
+use Plack::Builder;
 use Plack::Request;
 use parent 'Plack::Component';
 
-use Data::Dumper;
+sub config {
+    my ($self, $file) = @_;
+    return unless -f $file;
+
+    local(@ARGV) = $file; 
+    while(<>) {
+        next if $_ !~ /^\s*([A-Z][_A-Z0-9]*)\s*=\s*([^#\n]*)/;
+        $self->{$1} = $2;
+        if ($1 eq 'PROXY' and $2 !~ /^[*]\s*$/) {
+            $self->{TRUST} = [ split /\s*,\s*|\s+/, $self->{PROXY} ];
+        }
+    }
+}    
 
 sub prepare_app {
     my ($self) = @_;
-    $self->{app} ||= builder {
+    return if $self->{app};
+
+    $self->config( grep { -f $_ } "debian/$NAME.default", "/etc/default/$NAME" );
+    $self->{app} = builder {
+        enable_if { $self->{PROXY} } 'XForwardedFor',
+            trust => $self->{TRUST};
         enable 'CrossOrigin', origins => '*';
         enable 'JSONP';
         sub { $self->main(@_) }
@@ -61,9 +81,10 @@ sub main {
 
     if ($format eq 'aref') {
         my $aref = encode_aref $model;
+        cleanUTF8($aref);
         my $JSON = $req->param('pretty') ? JSON->new->pretty : JSON->new;
         my $json = $JSON->encode( $aref );
-        return [200, ['Content-Type' => 'application/json'], [$json]];
+        return [200, ['Content-Type' => 'application/json; encoding=UTF-8'], [$json]];
     } 
     
     if ($format eq 'html') {
@@ -71,6 +92,31 @@ sub main {
     }
 
     return [400, ['Content-Type' => 'text/plain'], ['format not supported']];
+}
+
+use Encode;
+
+sub cleanUTF8 {
+    my ($node) = @_;
+=head1    
+    return unless ref $node eq 'HASH';
+    while (my ($key, $value) = each %$node) {
+        my $type = ref $value || '';
+        if ($type eq 'HASH') {
+            cleanUTF($type);
+            return;
+        } elsif (!$type) {
+            $value = [$value];
+        }
+        $node->{$key} = [
+            map { }
+            @{$node->{$key}} = encode_utf8($node->{$key});
+        ];
+        } else {
+            $node->{$key} = encode_utf8($node->{$key});
+        }
+    }
+=cut    
 }
 
 1;

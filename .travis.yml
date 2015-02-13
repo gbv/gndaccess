@@ -1,5 +1,6 @@
 language: bash
 before_install:
+    - sudo apt-get update -qq
     - sudo make dependencies
 install:
     # don't use perlbrew
@@ -8,7 +9,6 @@ install:
 script:
     - export PACKAGE=`perl -ne 'print $1 if /^Package:\s+(.+)/;' < debian/control`
     - export TEST_URL=app
-    - carton exec -- prove -Ilib -v
     - make release-file
     - sudo dpkg -i ${PACKAGE}_*.deb
     - sudo service ${PACKAGE} status

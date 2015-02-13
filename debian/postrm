@@ -4,25 +4,32 @@ set -e
 PACKAGE="$DPKG_MAINTSCRIPT_PACKAGE"
 CARTON=/usr/local/bin/carton
 
+remove () {
+    # Remove init script links
+    update-rc.d $PACKAGE remove
+
+    # Remove user
+    userdel $PACKAGE || true
+
+    # Remove home directory
+    rm -rf /srv/$PACKAGE
+
+    # Remove log directory
+    rm -rf /var/log/$PACKAGE
+}
+
+purge () {
+    remove
+
+    # Remove config files
+    rm -rf /etc/$PACKAGE
+    rm -f /etc/default/$PACKAGE
+}    
+
 case "$1" in
-    remove)
-        # Remove init script links
-        update-rc.d $PACKAGE remove
-
-        # Remove user
-        userdel $PACKAGE || true
-
-        # Remove home directory
-        rm -rf /srv/$PACKAGE
-
-        # Remove log directory
-        rm -rf /var/log/$PACKAGE
+    remove|purge)
+        $1
     ;;
-
-    purge)
-        # Remove config files
-        rm -rf /etc/$PACKAGE
-        rm -f /etc/default/$PACKAGE
 
     upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
     ;;

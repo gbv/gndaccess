@@ -13,9 +13,11 @@ info:
 	@echo "Release: $(RELEASE)"
 	@echo "Depends: $(DEPENDS)"
 
-# install local Perl modules
-local:
-	carton install
+version:
+	@perl -p -i -e 's/^our\s+\$$VERSION\s*=.*/our \$$VERSION="$(VERSION)";/' \
+		lib/GBV/App/GNDAccess.pm
+	@perl -p -i -e 's/^our\s+\$$NAME\s*=.*/our \$$NAME="$(PACKAGE)";/' \
+		lib/GBV/App/GNDAccess.pm
 
 # build documentation
 PANDOC = $(shell which pandoc)
@@ -23,22 +25,26 @@ ifeq ($(PANDOC),)
   PANDOC = $(error pandoc is required but not installed)
 endif
 
-manpage: debian/control debian/$(PACKAGE).1
-debian/$(PACKAGE).1: README.md
-	grep -v '^\[!' $< | $(PANDOC) -s -t man -o $@ \
+documentation: debian/$(PACKAGE).1
+debian/$(PACKAGE).1: debian/control README.md
+	@grep -v '^\[!' $< | $(PANDOC) -s -t man -o $@ \
 		-M title="$(shell echo $(PACKAGE) | tr a-z A-Z)(1) Manual" -o $@
 
 # build Debian package
-release-file: local manpage
+release-file: documentation version
+	carton check
+	carton exec prove -Ilib
 	dpkg-buildpackage -b -us -uc -rfakeroot
 	mv ../$(RELEASE) .
+	git diff-index --quiet HEAD
 
 # do cleanup
 debian-clean:
 	fakeroot debian/rules clean
 
-# install required Debian packages and Carton
+# install required toolchain, Debian packages and Carton
 dependencies:
-	apt-get update -qq
-	apt-get install fakeroot dpkg-dev $(DEPLIST)
+	apt-get install fakeroot dpkg-dev
+	apt-get install pandoc libghc-citeproc-hs-data 
+	apt-get install $(DEPLIST)
 	cpanm Carton
