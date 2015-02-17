@@ -27,6 +27,13 @@ parameter:
 Cross-Origin Resource Sharing (CORS) also supported, so JSONP should not be
 required.
 
+The application includes an HTML client, consisting of the following files:
+
+* `index.html`
+* `gndaccess.css`
+* `gndaccess.json`
+* `formats.json` (generated dynamically)
+
 # INSTALLATION
 
 The application is packaged as Debian package (tested with Ubuntu >= 12.04). It
@@ -54,9 +61,13 @@ by updates.  Only simple key value-pairs are allowed with the following keys:
 
 Restart is needed after changes.
 
+The HTML client can be customized by putting static files into directory
+`/etc/gndaccess/htdocs` to override files in `/srv/gndaccess/htdocs`.
+
 # SEE ALSO
 
 Changelog is located in `debian/changelog` in the source code repository.
 
-Source code and issue tracker at <https://github.com/gbv/gndaccess>
+Source code and issue tracker at <https://github.com/gbv/gndaccess>. See
+file `CONTRIBUTING.md` source code organization.
 

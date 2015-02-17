@@ -65,6 +65,8 @@ sub prepare_app {
             s{^/$}{/index.html}; return
         };
         enable 'Static', path => qr{\.(html|js|ico|css|png)},
+            pass_through => 1, root => '/etc/gndaccess/htdocs';
+        enable 'Static', path => qr{\.(html|js|ico|css|png)},
             pass_through => 1, root => './htdocs';
         enable 'ContentLength';
         enable 'JSONP';
