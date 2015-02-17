@@ -1,3 +1,10 @@
+gndaccess (0.0.3) unstable; urgency=medium
+
+  * support HTTP content negotiation
+  * migrate client to AngularJS
+
+ -- Jakob Voß <jakob.voss@gbv.de>  Tue, 17 Feb 2015 12:03:34 +0100
+
 gndaccess (0.0.2) unstable; urgency=medium
 
   * added homepage with submit form

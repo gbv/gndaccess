@@ -1,32 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
-  <script type="text/javascript">
-$(function() {
-  $('#gndaccess').submit(function(){
-    var gnd = $.trim($('#gnd').val());
-    var format = "aref";
-    if (gnd != "" && gnd.match(/^[0-9-]+$/)) {
-        window.location = window.location + gnd + "?format=" + format + "&pretty=1";
-    }
-    return false;
-  });
-});
-  </script>
+  <meta charset="utf-8">  
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.13/angular.min.js"></script>
+  <script src="gndaccess.js"></script>
+  <link rel="stylesheet" type="text/css" href="gndaccess.css" />
 </head>
-<body>
-  <p>
-    Dies ist ein Platzhalter für eine schönere Startseite.
-  </p>
+<body ng-app="gndaccessApp" ng-controller="gndaccessCtrl">
   <!-- TODO: use ng-suggest -->
-  <form id="gndaccess">
-    <label>GND</label>
-    <input required type="text" id="gnd"/>
-    <input type="submit" value="OK"/>
-    <select name="format">
-      <option>aref</option>
+  <form novalidate ng-submit="submitGND()" name="gnd_form">
+    <label>GND ID</label>
+    <input required type="text" ng-model="gnd" ng-pattern="/^[0-9X-]+$/">
+    <input type="submit" value="get"/>
+    <select ng-model="format" ng-options="k as v.name for (k, v) in formats">
     </select>
   </form>
+  <div ng-if="gnd && gnd_form.$valid">
+    <p>
+      <a href="http://d-nb.info/gnd/{{gnd}}">http://d-nb.info/gnd/{{gnd}}</a>
+    </p>
+    <p ng-if="aref">
+      <a href="{{gnd}}?format=aref">{{gnd}}?format=aREF</a>
+      <pre>{{aref | json}}</pre>
+    </p>
+    <p ng-if="gnd && !aref"><em>not found!</em></p>
+  </p>
 </html>
