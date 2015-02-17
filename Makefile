@@ -26,7 +26,7 @@ ifeq ($(PANDOC),)
 endif
 
 documentation: debian/$(PACKAGE).1
-debian/$(PACKAGE).1: debian/control README.md
+debian/$(PACKAGE).1: README.md debian/control
 	@grep -v '^\[!' $< | $(PANDOC) -s -t man -o $@ \
 		-M title="$(shell echo $(PACKAGE) | tr a-z A-Z)(1) Manual" -o $@
 
