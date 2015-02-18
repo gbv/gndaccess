@@ -1,3 +1,10 @@
+gndaccess (0.0.4) unstable; urgency=medium
+
+  * deploy tagged versions at GitHub releases
+  * fix customization in /etc/gndaccess/htdocs
+
+ -- Jakob Voß <jakob.voss@gbv.de>  Wed, 18 Feb 2015 09:58:48 +0100
+
 gndaccess (0.0.3) unstable; urgency=medium
 
   * support HTTP content negotiation

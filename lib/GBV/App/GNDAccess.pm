@@ -1,7 +1,7 @@
 package GBV::App::GNDAccess;
 use v5.14.1;
 
-our $VERSION="0.0.3";
+our $VERSION="0.0.4";
 our $NAME="gndaccess";
 
 use RDF::aREF;
