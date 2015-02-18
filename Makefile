@@ -6,7 +6,7 @@ PACKAGE:=$(shell perl -ne 'print $$1 if /^Package:\s+(.+)/;' < debian/control)
 VERSION:=$(shell perl -ne '/^.+\s+[$(POPEN)](.+)[$(PCLOSE)]/ and print $$1 and exit' < debian/changelog)
 DEPENDS:=$(shell perl -ne 'print $$1 if /^Depends:\s+(.+)/;' < debian/control)
 DEPLIST:=$(shell echo "$(DEPENDS)" | perl -pe 's/(\s|,|[$(POPEN)].+?[$(PCLOSE)])+/ /g')
-ARCH   :=$(shell dpkg --print-architecture)
+ARCH   :=$(shell perl -ne 'print $$1 if /^Architecture:\s+(.+)/;' < debian/control)
 RELEASE:=${PACKAGE}_${VERSION}_${ARCH}.deb
 
 info:

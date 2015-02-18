@@ -3,6 +3,7 @@
 gndaccess - Access GND records via HTTP
 
 [![Build Status](https://travis-ci.org/gbv/gndaccess.svg)](https://travis-ci.org/gbv/gndaccess)
+[![Latest Release](https://img.shields.io/github/release/gbv/gndaccess.svg)](https://github.com/gbv/gndaccess/releases)
 
 # SYNOPSIS
 
@@ -36,8 +37,10 @@ The application includes an HTML client, consisting of the following files:
 
 # INSTALLATION
 
-The application is packaged as Debian package (tested with Ubuntu >= 12.04). It
-is installed at the following locations:
+The application is packaged as Debian package. No binaries are included, so the
+package should work on all architectures. It is tested with Ubuntu 12.04 LTS.
+
+Files are installed at the following locations:
 
 * `/srv/gndaccess/` - application
 * `/var/log/gndaccess/` - log files
