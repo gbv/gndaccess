@@ -10,6 +10,7 @@ use RDF::Trine::Serializer;
 use JSON;
 
 use Plack::Builder;
+use HTTP::Tiny;
 use Plack::Request;
 use parent 'Plack::Component';
 
@@ -33,6 +34,11 @@ sub formats {
             name => 'RDF/XML', 
             type => 'application/rdf+xml',
             rdf  => 'RDFXML',
+        },
+        marcxml => {
+            name => 'MARCXML',
+            type => 'application/marcxml+xml',
+            marc => 'marcxml'
         }
     }
 }
@@ -100,10 +106,11 @@ sub main {
     my ($self, $env) = @_;
     my $req = Plack::Request->new($env);
 
-    my $id = substr($req->path,1) || '';
-    # TODO: validate $id /^[0-9X-]+$/
-
-    my $uri = "http://d-nb.info/gnd/$id";
+    my $path = substr($req->path,1) || ''; 
+    if ( $path !~ qr{^(http://d-nb\.info/gnd/)?([0-9X-]+)$}) {
+        return [404, ['Content-Type' => 'text/plain'], ['invalid GND identifier'. $path]];
+    }
+    my ($uri,$id) = ("http://d-nb.info/gnd/$2",$2);
 
     my $format = $env->{'negotiate.format'} || 'html';
 
@@ -118,7 +125,7 @@ sub main {
             RDF::Trine::Parser->parse_url_into_model( $uri, $model );
         };
         if ($@ || !$model->size) {
-            return $self->json(404 => { error => "GND $id not found" });
+            return $self->json(404 => { error => "GND not found via $uri" });
         }
 
         if ($format->{rdf} == 'aref') {
@@ -133,8 +140,20 @@ sub main {
 
     # MARC-based formats
     } elsif ($format->{marc}) {
-        my $url = "http://d-nb.info/$id/about/marcxml"
-        # ...
+        my $url = "http://d-nb.info/gnd/$id/about/marcxml";
+        my $res = HTTP::Tiny->new->get($url) || {};
+        my $marcxml = $res->{content};
+        unless ( $res->{success} and length $marcxml) {
+            return $self->json(404 => { error => "GND not found via $url" });
+        }
+        $marcxml =~ s/^\s+//m;
+        if ($marcxml !~ qr{^<\?xml}) {
+            $marcxml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n$marcxml";
+        }
+
+        if ($format->{marc} eq 'marcxml') {
+            return [200,['Content-Type' => 'application/marcxml+xml'],[$marcxml]];
+        }
     }
 
     # html

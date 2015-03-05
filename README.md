@@ -17,9 +17,6 @@ This applications provices a web service to access GND records via HTTP in
 different formats. The format must be provided with URL query parameter
 `format`.
 
-The current draft only supports aREF format (RDF in JSON for easy access,
-similar to JSON-LD) with `format=aref`.
-
 All JSON-based formats can also be returned in JSONP with the `callback`
 parameter:
 
@@ -27,6 +24,15 @@ parameter:
 
 Cross-Origin Resource Sharing (CORS) also supported, so JSONP should not be
 required.
+
+## Supported formats
+
+* `aref`: aREF format (RDF in JSON for easy access, similar to JSON-LD)
+* `nt`: NTriples
+* `rdfxml`: RDF/XML
+* `marcxml`
+
+## HTML client
 
 The application includes an HTML client, consisting of the following files:
 
