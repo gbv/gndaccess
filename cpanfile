@@ -9,3 +9,5 @@ requires 'RDF::aREF';
 # - Plack
 # - RDF::Trine
 # - JSON
+
+test_requires 'Plack::Util::Load';

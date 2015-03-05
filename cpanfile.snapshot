@@ -754,6 +754,14 @@ DISTRIBUTIONS
       Plack 0.9913
       Regexp::Common 2010010201
       parent 0.223
+  Plack-Util-Load-0.1
+    pathname: V/VO/VOJ/Plack-Util-Load-0.1.tar.gz
+    provides:
+      Plack::Util::Load 0.1
+    requirements:
+      Module::Build::Tiny 0.039
+      Plack 1.0026
+      perl 5.008001
   RDF-NS-20140910
     pathname: V/VO/VOJ/RDF-NS-20140910.tar.gz
     provides:

@@ -17,7 +17,8 @@ sub formats {
     return {
         aref => { 
             name => 'aREF', 
-            type => 'application/json' 
+            type => 'application/json', 
+            rdf  => 'aref',
         },
         html => { 
             name => 'HTML', 
@@ -26,12 +27,12 @@ sub formats {
         nt => { 
             name => 'NTriples', 
             type => 'application/n-triples',
-            serializer => 'NTriples',
+            rdf  => 'NTriples',
         },
         rdfxml => { 
             name => 'RDF/XML', 
             type => 'application/rdf+xml',
-            serializer => 'RDFXML',
+            rdf  => 'RDFXML',
         }
     }
 }
@@ -65,7 +66,7 @@ sub prepare_app {
             s{^/$}{/index.html}; return
         };
         enable 'Static', path => qr{\.(html|js|ico|css|png)},
-            pass_through => 1, root => '/etc/gndaccess/htdocs';
+            pass_through => 1, root => "/etc/$NAME/htdocs";
         enable 'Static', path => qr{\.(html|js|ico|css|png)},
             pass_through => 1, root => './htdocs';
         enable 'ContentLength';
@@ -90,9 +91,8 @@ sub call {
 }
 
 sub json {
-    my ($self, $code, $data, $pretty) = @_;
-    my $JSON = $pretty ? JSON->new->pretty : JSON->new;
-    my $json = $JSON->encode($data);
+    my ($self, $code, $data) = @_;
+    my $json = JSON->new->pretty->encode($data);
     return [$code, ['Content-Type' => 'application/json; encoding=UTF-8'], [$json]];
 }
 
@@ -103,39 +103,42 @@ sub main {
     my $id = substr($req->path,1) || '';
     # TODO: validate $id /^[0-9X-]+$/
 
+    my $uri = "http://d-nb.info/gnd/$id";
+
     my $format = $env->{'negotiate.format'} || 'html';
 
-    # MARCXML
-    # my $url = "http://d-nb.info/04021477X/about/marcxml"
-
-    my $url = "http://d-nb.info/gnd/$id";
-    my $model = RDF::Trine::Model->new;
-    eval {
-        RDF::Trine::Parser->parse_url_into_model( $url, $model );
-    };
-    if ($@ || !$model->size) {
-        return $self->json(404 => { error => "GND $id not found" });
+    unless ($format = $self->formats->{$format}) {
+        return [400, ['Content-Type' => 'text/plain'], ['format not supported']];
     }
 
-    if ($format eq 'aref') {
-        my $aref = encode_aref $model;
-        return $self->json( 200, $aref, $req->param('pretty') );
-    } 
-    
-    if (my $f = $self->formats->{$format}) {
-        if ($f->{serializer}) {
+    # RDF-based formats
+    if ($format->{rdf}) {
+        my $model = RDF::Trine::Model->new;
+        eval {
+            RDF::Trine::Parser->parse_url_into_model( $uri, $model );
+        };
+        if ($@ || !$model->size) {
+            return $self->json(404 => { error => "GND $id not found" });
+        }
+
+        if ($format->{rdf} == 'aref') {
+            my $aref = encode_aref $model;
+            return $self->json( 200, $aref );
+        } elsif ($format->{rdf}) {
             use Encode qw(decode_utf8);
-            my $rdf = RDF::Trine::Serializer->new($f->{serializer})
+            my $rdf = RDF::Trine::Serializer->new($format->{rdf})
                     ->serialize_model_to_string($model);
             return [200,[], [decode_utf8($rdf)]];
         }
+
+    # MARC-based formats
+    } elsif ($format->{marc}) {
+        my $url = "http://d-nb.info/$id/about/marcxml"
+        # ...
     }
 
-    if ($format eq 'html') {
-        return [200, ['Content-Type' => 'text/plain'], ['GND gefunden (probier mal format=aref!)']];
-    }
-
-    return [400, ['Content-Type' => 'text/plain'], ['format not supported']];
+    # html
+    return [200, ['Content-Type' => 'text/plain'], ['GND gefunden (probier mal format=aref!)']];
 }
 
 1;

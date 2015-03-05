@@ -27,8 +27,8 @@ First make sure to install required Debian modules:
 
     $ make dependencies
 
-It is recommended to use the same version of Perl as used on the target
-platform (e.g. Perl 5.14 for Ubuntu 12.04), for instance with Perlbrew:
+It is recommended (not required) to use the same version of Perl as used on the
+target platform (e.g. Perl 5.14 for Ubuntu 12.04), for instance with Perlbrew:
 
     $ perlbrew use 5.14.4
 
