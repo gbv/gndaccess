@@ -1,0 +1,16 @@
+---
+importer:
+  marc2gnd:
+    package: MARC
+    options:
+      type: XML
+      fix: perlcode(gndmarc2json.pl)
+exporter:
+  yaml:
+    package: YAML
+store:
+  couchdb:
+    package: CouchDB
+    options:
+      default_bag: gnd
+
