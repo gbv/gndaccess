@@ -4,7 +4,7 @@ before_install:
   - sudo make dependencies
 install:
   - sudo chown -R travis:travis /home/travis/.cpanm
-  - carton install --deployment
+  - carton install
 script:
   - export PACKAGE=`perl -ne 'print $1 if /^Package:\s+(.+)/;' < debian/control`
   - export TEST_URL=app.psgi

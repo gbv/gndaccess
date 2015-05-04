@@ -8,6 +8,7 @@ requires 'RDF::aREF';
 # not listed here because implied by required Debian packages:
 # - Plack
 # - RDF::Trine
+requires 'RDF::Trine', '1.013';
 # - JSON
 
 test_requires 'Plack::Util::Load';

@@ -1,7 +1,7 @@
 gndaccess (0.0.5) unstable; urgency=medium
 
   * extended HTML client
-  * fixed UTF-8 encoding in JSON
+  * fixed UTF-8 encoding in JSON, now using NFKC
   * add logrotate configuration 
 
  -- Jakob Voß <jakob.voss@gbv.de>  Mon, 04 May 2015 10:28:26 +0200

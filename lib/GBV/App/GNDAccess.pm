@@ -8,7 +8,7 @@ use RDF::aREF;
 use RDF::Trine;
 use RDF::Trine::Serializer;
 use JSON;
-
+use Unicode::Normalize;
 use Plack::Builder;
 use HTTP::Tiny;
 use Plack::Request;
@@ -120,11 +120,8 @@ sub main {
 
     # RDF-based formats
     if ($format->{rdf}) {
-        my $model = RDF::Trine::Model->new;
-        eval {
-            RDF::Trine::Parser->parse_url_into_model( $uri, $model );
-        };
-        if ($@ || !$model->size) {
+        my $model = eval { get_rdf_NFKC($uri) };
+        if ($@ || !$model || !$model->size) {
             return $self->json(404 => { error => "GND not found via $uri" });
         }
 
@@ -158,6 +155,22 @@ sub main {
 
     # html
     return [200, ['Content-Type' => 'text/plain'], ['GND gefunden (probier mal format=aref!)']];
+}
+
+sub get_rdf_NFKC {
+    my ($uri) = @_;
+    my $model = RDF::Trine::Model->new;
+    $model->begin_bulk_ops;
+    RDF::Trine::Parser->parse_url( $uri, sub {
+        my $s = $_[0];
+        if ($s->object->is_literal) {
+            my $value = Unicode::Normalize::normalize('KC', $s->object->literal_value);
+            $s->object->literal_value($value);
+        }
+        $model->add_statement($s); 
+    } );
+    $model->end_bulk_ops;
+    return $model;
 }
 
 1;

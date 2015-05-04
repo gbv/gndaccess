@@ -16,7 +16,8 @@ test_psgi $app, sub {
     $res = $cb->(GET "/$id?format=aref");
     is $res->code, '200', "/$id?format=aref => 200";
     my $aref = JSON->new->decode($res->content);
-    ok $aref->{"http://d-nb.info/gnd/$id"}, 'aref';
+    is $aref->{"http://d-nb.info/gnd/$id"}
+            ->{'gnd_preferredNameForThePlaceOrGeographicName'}, "Göttingen@", 'aref';
 
     $res = $cb->(GET "/$id?format=marcxml");
     is $res->code, '200', "/$id?format=marcxml => 200";
