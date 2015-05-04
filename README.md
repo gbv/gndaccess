@@ -2,7 +2,7 @@
 
 gndaccess - Access GND records via HTTP
 
-[![Build Status](https://travis-ci.org/gbv/gndaccess.svg)](https://travis-ci.org/gbv/gndaccess)
+[![Build Status](https://travis-ci.org/gbv/gndaccess.svg?branch=master)](https://travis-ci.org/gbv/gndaccess)
 [![Latest Release](https://img.shields.io/github/release/gbv/gndaccess.svg)](https://github.com/gbv/gndaccess/releases)
 
 # SYNOPSIS
@@ -17,13 +17,7 @@ This applications provices a web service to access GND records via HTTP in
 different formats. The format must be provided with URL query parameter
 `format`.
 
-All JSON-based formats can also be returned in JSONP with the `callback`
-parameter:
-
-* <http://localhost:6699/4021477-1?format=aref&callback=abc>
-
-Cross-Origin Resource Sharing (CORS) also supported, so JSONP should not be
-required.
+* <http://localhost:6699/4021477-1?format=aref>
 
 ## Supported formats
 
@@ -31,6 +25,13 @@ required.
 * `nt`: NTriples
 * `rdfxml`: RDF/XML
 * `marcxml`
+
+## CORS and JSONP
+
+Cross-Origin Resource Sharing (CORS) is enabled by default. In addition all
+JSON-based formats can can be returned in JSONP with parameter `callback`:
+
+* <http://localhost:6699/4021477-1?format=aref&callback=abc>
 
 ## HTML client
 
@@ -43,13 +44,18 @@ The application includes an HTML client, consisting of the following files:
 
 # INSTALLATION
 
-The application is packaged as Debian package. No binaries are included, so the
-package should work on all architectures. It is tested with Ubuntu 12.04 LTS.
+The application is packaged as Debian package. Releases can be found at
+
+* <https://github.com/gbv/gndaccess/releases>
+
+No binaries are included, so the package should work on all architectures. It
+is tested with Ubuntu 12.04 LTS and Ubuntu 14.04 LTS.
 
 Files are installed at the following locations:
 
 * `/srv/gndaccess/` - application
-* `/var/log/gndaccess/` - log files
+* `/var/log/gndaccess/` - log files `access.log` and `error.log`
+* `/etc/logrotate.d/gndaccess` - logrotate configuration (compress daily, keep 14 days)
 * `/etc/default/gndaccess` - server configuration
 * `/etc/gndaccess/` - application configuration
 
@@ -75,8 +81,10 @@ The HTML client can be customized by putting static files into directory
 
 # SEE ALSO
 
-Changelog is located in `debian/changelog` in the source code repository.
+Changelog is located in file [`debian/changelog`](debian/changelog) in the
+source code repository.
 
 Source code and issue tracker at <https://github.com/gbv/gndaccess>. See
 file `CONTRIBUTING.md` source code organization.
 
+See <http://www.dnb.de/entityfacts> for a similar service.

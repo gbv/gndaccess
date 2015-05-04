@@ -1,0 +1,10 @@
+/var/log/gndaccess/*.log {
+     daily
+     rotate 14
+     compress
+     notifempty
+     missingok
+     postrotate
+         service gndaccess restart > /dev/null
+     endscript
+}

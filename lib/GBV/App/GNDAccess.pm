@@ -1,7 +1,7 @@
 package GBV::App::GNDAccess;
 use v5.14.1;
 
-our $VERSION="0.0.4";
+our $VERSION="0.0.5";
 our $NAME="gndaccess";
 
 use RDF::aREF;
@@ -98,7 +98,7 @@ sub call {
 
 sub json {
     my ($self, $code, $data) = @_;
-    my $json = JSON->new->pretty->encode($data);
+    my $json = JSON->new->utf8->pretty->encode($data);
     return [$code, ['Content-Type' => 'application/json; encoding=UTF-8'], [$json]];
 }
 

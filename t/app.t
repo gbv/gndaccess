@@ -20,7 +20,7 @@ test_psgi $app, sub {
 
     $res = $cb->(GET "/$id?format=marcxml");
     is $res->code, '200', "/$id?format=marcxml => 200";
-#    note $res->content;
+    ok $res->content;
 };
 
 done_testing;

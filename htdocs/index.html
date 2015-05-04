@@ -14,15 +14,23 @@
     <input type="submit" value="get"/>
     <select ng-model="format" ng-options="k as v.name for (k, v) in formats">
     </select>
+    <a ng-if="gnd && gnd_form.$valid && aref" href="{{gnd}}?format=aref">{{gnd}}?format=aREF</a>
   </form>
   <div ng-if="gnd && gnd_form.$valid">
     <p>
       <a href="http://d-nb.info/gnd/{{gnd}}">http://d-nb.info/gnd/{{gnd}}</a>
     </p>
     <p ng-if="aref">
-      <a href="{{gnd}}?format=aref">{{gnd}}?format=aREF</a>
       <pre>{{aref | json}}</pre>
     </p>
-    <p ng-if="gnd && !aref"><em>not found!</em></p>
-  </p>
+    <p ng-if="!aref"><em>not found!</em></p>
+    <p>
+      <b>See also</b>
+      <ul>
+        <li ng-repeat="(name,url) in seealso">
+          <a href="{{url}}{{gnd}}">{{name}}</a>
+        </li>
+      </ul>
+    </p>
+  </div>
 </html>

@@ -17,17 +17,26 @@ sudo\ service\ gndaccess\ {status|start|stop|restart}
 This applications provices a web service to access GND records via HTTP
 in different formats.
 The format must be provided with URL query parameter \f[C]format\f[].
+.IP \[bu] 2
+<http://localhost:6699/4021477-1?format=aref>
+.SS Supported formats
+.IP \[bu] 2
+\f[C]aref\f[]: aREF format (RDF in JSON for easy access, similar to
+JSON\-LD)
+.IP \[bu] 2
+\f[C]nt\f[]: NTriples
+.IP \[bu] 2
+\f[C]rdfxml\f[]: RDF/XML
+.IP \[bu] 2
+\f[C]marcxml\f[]
+.SS CORS and JSONP
 .PP
-The current draft only supports aREF format (RDF in JSON for easy
-access, similar to JSON\-LD) with \f[C]format=aref\f[].
-.PP
-All JSON\-based formats can also be returned in JSONP with the
-\f[C]callback\f[] parameter:
+Cross\-Origin Resource Sharing (CORS) is enabled by default.
+In addition all JSON\-based formats can can be returned in JSONP with
+parameter \f[C]callback\f[]:
 .IP \[bu] 2
 <http://localhost:6699/4021477-1?format=aref&callback=abc>
-.PP
-Cross\-Origin Resource Sharing (CORS) also supported, so JSONP should
-not be required.
+.SS HTML client
 .PP
 The application includes an HTML client, consisting of the following
 files:
@@ -41,13 +50,24 @@ files:
 \f[C]formats.json\f[] (generated dynamically)
 .SH INSTALLATION
 .PP
-The application is packaged as Debian package (tested with Ubuntu >=
-12.04).
-It is installed at the following locations:
+The application is packaged as Debian package.
+Releases can be found at
+.IP \[bu] 2
+<https://github.com/gbv/gndaccess/releases>
+.PP
+No binaries are included, so the package should work on all
+architectures.
+It is tested with Ubuntu 12.04 LTS and Ubuntu 14.04 LTS.
+.PP
+Files are installed at the following locations:
 .IP \[bu] 2
 \f[C]/srv/gndaccess/\f[] \- application
 .IP \[bu] 2
-\f[C]/var/log/gndaccess/\f[] \- log files
+\f[C]/var/log/gndaccess/\f[] \- log files \f[C]access.log\f[] and
+\f[C]error.log\f[]
+.IP \[bu] 2
+\f[C]/etc/logrotate.d/gndaccess\f[] \- logrotate configuration (compress
+daily, keep 14 days)
 .IP \[bu] 2
 \f[C]/etc/default/gndaccess\f[] \- server configuration
 .IP \[bu] 2
@@ -78,8 +98,11 @@ The HTML client can be customized by putting static files into directory
 \f[C]/srv/gndaccess/htdocs\f[].
 .SH SEE ALSO
 .PP
-Changelog is located in \f[C]debian/changelog\f[] in the source code
+Changelog is located in file
+\f[C]debian/changelog\f[] (debian/changelog) in the source code
 repository.
 .PP
 Source code and issue tracker at <https://github.com/gbv/gndaccess>.
 See file \f[C]CONTRIBUTING.md\f[] source code organization.
+.PP
+See <http://www.dnb.de/entityfacts> for a similar service.
