@@ -1,0 +1,21 @@
+{
+   "@context" : "https://gbv.github.io/jskos/context.json",
+   "identifier" : [
+      "http://dbpedia.org/resource/Bill_Gates",
+      "http://viaf.org/viaf/102370574"
+   ],
+   "prefLabel" : {
+      "de" : "Gates, Bill"
+   },
+   "scopeNote" : {
+      "de" : [
+         "Amerikan. Unternehmer, Gründer u. Präsident der Microsoft Corp."
+      ]
+   },
+   "startDate" : "1955-10-28",
+   "type" : [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+   ],
+   "uri" : "http://d-nb.info/gnd/119081199",
+   "url" : "http://de.wikipedia.org/wiki/Bill_Gates"
+}

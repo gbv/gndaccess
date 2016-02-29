@@ -1,3 +1,9 @@
+gndaccess (0.0.6) unstable; urgency=medium
+
+  * removed RDF formats, added basic JSKOS 
+
+ -- Jakob Voß <jakob.voss@gbv.de>  Mon, 29 Feb 2016 14:59:08 +0100
+
 gndaccess (0.0.5) unstable; urgency=medium
 
   * extended HTML client

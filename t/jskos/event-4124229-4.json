@@ -1,0 +1,26 @@
+{
+   "@context" : "https://gbv.github.io/jskos/context.json",
+   "altLabel" : {
+      "de" : [
+         "Sklavenaufstand <73 v. Chr.-71 v. Chr.>",
+         "Spartacusaufstand <73 v. Chr.-71 v. Chr.>"
+      ]
+   },
+   "broader" : [
+      {
+         "uri" : "http://d-nb.info/gnd/4055256-1"
+      }
+   ],
+   "prefLabel" : {
+      "de" : "Spartakusaufstand <73 v. Chr.-71 v. Chr.>"
+   },
+   "related" : [
+      {
+         "uri" : "http://d-nb.info/gnd/4076778-4"
+      }
+   ],
+   "type" : [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+   ],
+   "uri" : "http://d-nb.info/gnd/4124229-4"
+}

@@ -22,9 +22,8 @@ different formats. The format must be provided with URL query parameter
 ## Supported formats
 
 * `aref`: aREF format (RDF in JSON for easy access, similar to JSON-LD)
-* `nt`: NTriples
-* `rdfxml`: RDF/XML
-* `marcxml`
+* `jskos`: JSKOS format (basic support)
+* `marcxml`: MARC XML format
 
 ## CORS and JSONP
 
@@ -84,7 +83,7 @@ The HTML client can be customized by putting static files into directory
 Changelog is located in file [`debian/changelog`](debian/changelog) in the
 source code repository.
 
-Source code and issue tracker at <https://github.com/gbv/gndaccess>. See
-file `CONTRIBUTING.md` source code organization.
+Source code and issue tracker at <https://github.com/gbv/gndaccess>. See file
+[`CONTRIBUTING.md`](CONTRIBUTING.md)` for source code organization.
 
 See <http://www.dnb.de/entityfacts> for a similar service.

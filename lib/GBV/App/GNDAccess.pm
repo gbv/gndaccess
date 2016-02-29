@@ -1,7 +1,7 @@
 package GBV::App::GNDAccess;
 use v5.14.1;
 
-our $VERSION="0.0.5";
+our $VERSION="0.0.6";
 our $NAME="gndaccess";
 
 use RDF::aREF;
@@ -16,24 +16,19 @@ use parent 'Plack::Component';
 
 sub formats {
     return {
+        html => { 
+            name => 'HTML', 
+            type => 'text/html' 
+        },
         aref => { 
             name => 'aREF', 
             type => 'application/json', 
             rdf  => 'aref',
         },
-        html => { 
-            name => 'HTML', 
-            type => 'text/html' 
-        },
-        nt => { 
-            name => 'NTriples', 
-            type => 'application/n-triples',
-            rdf  => 'NTriples',
-        },
-        rdfxml => { 
-            name => 'RDF/XML', 
-            type => 'application/rdf+xml',
-            rdf  => 'RDFXML',
+        jskos => { 
+            name => 'JSKOS', 
+            type => 'application/json', 
+            rdf => 'jskos',
         },
         marcxml => {
             name => 'MARCXML',
@@ -125,9 +120,13 @@ sub main {
             return $self->json(404 => { error => "GND not found via $uri" });
         }
 
-        if ($format->{rdf} == 'aref') {
+        if ($format->{rdf} eq 'aref') {
             my $aref = encode_aref $model;
             return $self->json( 200, $aref );
+        } elsif ($format->{rdf} eq 'jskos') {
+            my $aref = encode_aref $model;
+            my $jskos = gndaref2jskos($aref, $uri);
+            return $self->json( 200, $jskos );
         } elsif ($format->{rdf}) {
             use Encode qw(decode_utf8);
             my $rdf = RDF::Trine::Serializer->new($format->{rdf})
@@ -171,6 +170,66 @@ sub get_rdf_NFKC {
     } );
     $model->end_bulk_ops;
     return $model;
+}
+
+sub gndaref2jskos {
+    my ($aref, $uri) = @_;
+    my $jskos = {
+        uri => $uri,
+        type => ['http://www.w3.org/2004/02/skos/core#Concept'],
+        '@context' => 'https://gbv.github.io/jskos/context.json',
+    };
+    my $tmp = aref_query_map $aref, $uri, {
+        'foaf_page.' => 'url',
+        'gnd_associatedDate^xs_date' =>  'relatedDate',
+        'gnd_beginningOfPeriod^xs_date' =>  'startDate',
+        'gnd_biographicalOrHistoricalInformation@' => 'scopeNote',
+        'gnd_dateOfBirth^xs_date' =>  'startDate',
+        'gnd_dateOfDeath^xs_date' =>  'endDate',
+        'gnd_preferredNameForThePerson@' => 'prefLabel',
+        'gnd_variantNameForTheSubjectHeading' => 'altLabel',
+        'owl_sameAs.' => 'identifier',
+        'gnd_broader.' => 'broader',
+        'gnd_broaderTermInstantial.' => 'broader',
+        'gnd_corporateBodyIsMember' => 'broader',
+        'gnd_dateOfEstablishment' => 'startDate',
+        'gnd_dateOfProduction' => 'startDate',
+        'gnd_dateOfPublication' => 'startDate',
+        'gnd_dateOfTermination' => 'endDate',
+        'gnd_endOfPeriod' => 'endDate',
+        'gnd_definition' => 'definition',
+        'gnd_preferredNameForTheSubjectHeading@' => 'prefLabel',
+        'gnd_relatedPlaceOrGeographicName' => 'related',
+    };
+    my $list  = sub { (ref $_[0] or !defined $_[0]) ? $_[0] : [$_[0]] };  # get a list
+    my $value = sub { ref $_[0] ? $_[0][0] : $_[0] }; # get a single value
+
+    foreach (qw(url startDate endDate relatedDate)) {
+        $jskos->{$_} = $value->($tmp->{$_});
+    }
+
+    foreach (qw(altLabel scopeNote)) {
+        my $values = $list->($tmp->{$_});
+        $jskos->{$_} = { "de" => [ sort @$values ] } if $values;
+    }
+
+    foreach (qw(identifier)) {
+        my $values = $list->($tmp->{$_});
+        $jskos->{$_} = [ sort @$values ] if $values;
+    }
+
+    foreach (qw(broader related narrower previous next)) {
+        my $values = $list->($tmp->{$_});
+        $jskos->{$_} = [ sort { $a->{uri} cmp $b->{uri} } 
+                         map { { uri => $_ } } @$values ] if $values;
+    }
+    
+    $jskos->{prefLabel} = { "de" => $value->($tmp->{prefLabel}) } if defined $tmp->{prefLabel};
+
+
+    delete $jskos->{$_} for grep { !defined $jskos->{$_} } keys %$jskos;
+
+    return $jskos;
 }
 
 1;

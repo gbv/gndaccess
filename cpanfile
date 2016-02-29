@@ -3,7 +3,7 @@ requires 'Plack::Middleware::CrossOrigin';
 requires 'Plack::Middleware::XForwardedFor';
 requires 'Plack::Middleware::Rewrite';
 requires 'Plack::Middleware::Negotiate', '0.10';
-requires 'RDF::aREF';
+requires 'RDF::aREF', '0.25';
 
 # not listed here because implied by required Debian packages:
 # - Plack
