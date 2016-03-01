@@ -24,6 +24,8 @@ different formats. The format must be provided with URL query parameter
 * `aref`: aREF format (RDF in JSON for easy access, similar to JSON-LD)
 * `jskos`: JSKOS format (basic support)
 * `marcxml`: MARC XML format
+* `nt`: NTriples
+* `rdfxml`: RDF/XML
 
 ## CORS and JSONP
 

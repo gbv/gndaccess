@@ -12,6 +12,7 @@ use Unicode::Normalize;
 use Plack::Builder;
 use HTTP::Tiny;
 use Plack::Request;
+use File::Temp qw(tempfile);
 use parent 'Plack::Component';
 
 sub formats {
@@ -34,7 +35,17 @@ sub formats {
             name => 'MARCXML',
             type => 'application/marcxml+xml',
             marc => 'marcxml'
-        }
+        },
+        nt => { 
+            name => 'NTriples', 
+            type => 'application/n-triples',
+            rdf  => 'NTriples',
+        },
+        rdfxml => { 
+            name => 'RDF/XML', 
+            type => 'application/rdf+xml',
+            rdf  => 'RDFXML',
+        },
     }
 }
 
@@ -115,23 +126,23 @@ sub main {
 
     # RDF-based formats
     if ($format->{rdf}) {
-        my $model = eval { get_rdf_NFKC($uri) };
+        my $model = eval { getRDF($uri) };
         if ($@ || !$model || !$model->size) {
             return $self->json(404 => { error => "GND not found via $uri" });
         }
 
         if ($format->{rdf} eq 'aref') {
-            my $aref = encode_aref $model;
+            my $aref = encode_aref $model, NFC => 1;
             return $self->json( 200, $aref );
         } elsif ($format->{rdf} eq 'jskos') {
-            my $aref = encode_aref $model;
+            my $aref = encode_aref $model, NFC => 1;
             my $jskos = gndaref2jskos($aref, $uri);
             return $self->json( 200, $jskos );
         } elsif ($format->{rdf}) {
             use Encode qw(decode_utf8);
             my $rdf = RDF::Trine::Serializer->new($format->{rdf})
                     ->serialize_model_to_string($model);
-            return [200,[], [decode_utf8($rdf)]];
+            return [200,[], [$rdf]];
         }
 
     # MARC-based formats
@@ -156,19 +167,22 @@ sub main {
     return [200, ['Content-Type' => 'text/plain'], ['GND gefunden (probier mal format=aref!)']];
 }
 
-sub get_rdf_NFKC {
+sub getRDF {
     my ($uri) = @_;
     my $model = RDF::Trine::Model->new;
-    $model->begin_bulk_ops;
-    RDF::Trine::Parser->parse_url( $uri, sub {
-        my $s = $_[0];
-        if ($s->object->is_literal) {
-            my $value = Unicode::Normalize::normalize('KC', $s->object->literal_value);
-            $s->object->literal_value($value);
-        }
-        $model->add_statement($s); 
-    } );
-    $model->end_bulk_ops;
+
+    # This nasty fix makes sure that RDF is loaded as Unicode.
+    # We could add caching here
+    my $rdfxml;
+    my $parser = RDF::Trine::Parser::RDFXML->new;
+    $parser->parse_url( $uri, sub { }, content_cb => sub { 
+        $rdfxml = $_[1] } 
+    );
+    my ($fh, $filename) = tempfile();
+    say $fh $rdfxml;
+    close $fh;
+    $parser->parse_file_into_model( $uri, $filename, $model );
+
     return $model;
 }
 
@@ -180,7 +194,8 @@ sub gndaref2jskos {
         '@context' => 'https://gbv.github.io/jskos/context.json',
     };
     my $tmp = aref_query_map $aref, $uri, {
-        'foaf_page.' => 'url',
+        'gnd_homepage.' => 'url',
+        'foaf_page.' => 'subjectOf',
         'gnd_associatedDate^xs_date' =>  'relatedDate',
         'gnd_beginningOfPeriod^xs_date' =>  'startDate',
         'gnd_biographicalOrHistoricalInformation@' => 'scopeNote',
@@ -200,6 +215,8 @@ sub gndaref2jskos {
         'gnd_definition' => 'definition',
         'gnd_preferredNameForTheSubjectHeading@' => 'prefLabel',
         'gnd_relatedPlaceOrGeographicName' => 'related',
+        'gnd_preferredNameForThePlaceOrGeographicName@' => 'prefLabel',
+        'gnd_variantNameForThePlaceOrGeographicName@' => 'altLabel',
     };
     my $list  = sub { (ref $_[0] or !defined $_[0]) ? $_[0] : [$_[0]] };  # get a list
     my $value = sub { ref $_[0] ? $_[0][0] : $_[0] }; # get a single value
@@ -209,19 +226,23 @@ sub gndaref2jskos {
     }
 
     foreach (qw(altLabel scopeNote)) {
-        my $values = $list->($tmp->{$_});
-        $jskos->{$_} = { "de" => [ sort @$values ] } if $values;
+        my $values = $list->($tmp->{$_}) // next;
+        $jskos->{$_} = { "de" => [ sort @$values ] };
     }
 
     foreach (qw(identifier)) {
-        my $values = $list->($tmp->{$_});
-        $jskos->{$_} = [ sort @$values ] if $values;
+        my $values = $list->($tmp->{$_}) // next;
+        $jskos->{$_} = [ sort @$values ];
     }
 
     foreach (qw(broader related narrower previous next)) {
-        my $values = $list->($tmp->{$_});
-        $jskos->{$_} = [ sort { $a->{uri} cmp $b->{uri} } 
-                         map { { uri => $_ } } @$values ] if $values;
+        my $values = $list->($tmp->{$_}) // next;
+        $jskos->{$_} = [ map { { uri => $_ } } sort @$values ];
+    }
+
+    foreach (qw(subjectOf)) {
+        my $values = $list->($tmp->{$_}) // next;
+        $jskos->{$_} = [ map { { url => $_ } } sort @$values ];
     }
     
     $jskos->{prefLabel} = { "de" => $value->($tmp->{prefLabel}) } if defined $tmp->{prefLabel};

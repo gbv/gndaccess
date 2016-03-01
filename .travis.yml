@@ -1,32 +1,31 @@
 language: bash
 before_install:
-  - sudo apt-get update -qq
-  - sudo make dependencies
+    - lsb_release -a
+    - sudo apt-get update -qq
 install:
-  - sudo chown -R travis:travis /home/travis/.cpanm
-  - carton install
+    - sudo make dependencies
+    - make local
 script:
-  - export PACKAGE=`perl -ne 'print $1 if /^Package:\s+(.+)/;' < debian/control`
-  - export TEST_URL=app.psgi
-  - make release-file
-  - sudo dpkg -i ${PACKAGE}_*.deb
-  - sudo service ${PACKAGE} status
-  - sudo service ${PACKAGE} restart
-  - export TEST_URL=6699
-  - carton exec -- prove -Ilib -v
-cache: apt
+    # make test and create Debian package
+    - make package
+    # locally install package
+    - sudo dpkg -i gndaccess_*.deb
+    - sudo service gndaccess status
+    # test against localhost
+    - export TEST_URL=6699
+    - prove -Ilib -Ilocal/lib/perl5 -v
+
 after_failure:
-  - tail -200 /var/log/${PACKAGE}/error.log
-  - tail -200 /var/log/${PACKAGE}/access.log
-  - curl -i http://localhost:6699/
+    - tail -200 /var/log/gndaccess/error.log
+
+# Release Debian package via GitHub releases on tagged commits
 before_deploy:
-  - export RELEASE_PKG_FILE=$(ls *.deb)
-  - echo "deploying $RELEASE_PKG_FILE"
+    - export RELEASE_FILE=$(ls *.deb)
+    - echo "deploying $RELEASE_FILE to GitHub releases"
 deploy:
   provider: releases
   api_key:
     secure: TVPV2HwXkCKZNqZ28Xn9sTF/bdU3wEpS0kGDWp2Jc1k2fwe0JW6I8XfoFw6XeGV1iQkXbZEQnXk0X/cudav6/SIRkVA/0Q5gcrucbDwzFlUA1Q70Na4bspcUQCiaiHWehLwHKxHOfgH7OVepSd++dPAmMWquIyK9V7Rx8JvvpsI=
-  file_glob: true
-  file: "${RELEASE_PKG_FILE}"
+  file: "${RELEASE_FILE}"
   on:
     tags: true

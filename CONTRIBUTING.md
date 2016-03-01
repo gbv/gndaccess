@@ -1,9 +1,38 @@
-# Contributing
+*See `README.md` for general introduction and usage documentation.*
 
-See `README.md` for a general introduction.
+# Infrastructure
 
-* <http://github.com/gbv/gndaccess>: source code repository
-* <http://github.com/gbv/gndaccess/issues>: issue tracker
+## Git repository
+
+The source code of gndaccess is managed in a public git repository at
+<https://github.com/gbv/gndaccess>.
+
+## Issue tracker
+
+Bug reports and feature requests are managed as GitHub issues at
+<https://github.com/gbv/gndaccess/issues>.
+
+# Technology
+
+Libsites is mainly written in Perl.
+
+The application is build and released as Debian package for Ubuntu 14.04 LTS.
+
+# Development
+
+## First steps
+
+For local usage and development clone the git repository and install
+dependencies:
+
+    sudo make dependencies
+    make local
+
+Locally run the web application on port 5000 for testing:
+
+    make run
+
+## Sources
 
 Relevant source code is located in
 
@@ -21,35 +50,40 @@ Relevant source code is located in
 Additional files should not need to be modified unless there is a bug in the
 Debian packaging or an upgrade requires some maintainance steps.
 
-Most development tasks are automated in `Makefile`.
+## Tests
 
-First make sure to install required Debian modules:
+Run all tests located in directory `t`. 
 
-    $ make dependencies
+    make tests
 
-It is recommended (not required) to use the same version of Perl as used on the
-target platform (e.g. Perl 5.14 for Ubuntu 12.04), for instance with Perlbrew:
+To run a selected test, for instance `t/app.t`: 
 
-    $ perlbrew use 5.14.4
+    perl -Ilib -Ilocal/lib/perl5 t/app.t
 
-Install additional Perl modules as listed in `cpanfile` into `local`:
+Black-box tests are only run if `TEST_URL` is set to a port number or URL.
 
-    $ carton install
+## Continuous Integration
 
-During development you should locally run the service with automatic restart:
+[![Build Status](https://travis-ci.org/gbv/gndaccess.svg)](https://travis-ci.org/gbv/gndaccess)
 
-    $ carton exec plackup -Ilib -r --port 6699
-    
-To run unit tests:
+After pushing to GitHub tests are also run automatically twice 
+[at travis-ci](https://travis-ci.org/gbv/gndaccess). The first 
+run is done via `make tests`, the second is run after packaging
+against an instance installed at localhost.
 
-    $ carton exec prove -l
+## Packaging and Release
 
-The environment variable `TEST_URL` affects which server the tests are run
-against. This can also be used to test an installed service at another host.
+Create a Debian package
 
-Finally build a Debian package for release:
+    make package
 
-    $ make release-file
+Make sure to run this on the target OS version (Ubuntu 14.04)!
 
-The build will produce a valid Debian package but should fail if the git
-repository is not clean.
+Travis-ci is configured to release build packages on tagged 
+versions.
+
+# License
+
+gndaccess is made available under the terms of GNU Affero General Public
+License (AGPL).
+

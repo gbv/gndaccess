@@ -1,0 +1,29 @@
+{
+   "@context" : "https://gbv.github.io/jskos/context.json",
+   "altLabel" : {
+      "de" : [
+         "Gettingen",
+         "Gotingē",
+         "Gottingen",
+         "Gutingi",
+         "Gëttingen",
+         "Stadt Göttingen"
+      ]
+   },
+   "identifier" : [
+      "http://sws.geonames.org/2918632"
+   ],
+   "prefLabel" : {
+      "de" : "Göttingen"
+   },
+   "subjectOf" : [
+      {
+         "url" : "http://de.wikipedia.org/wiki/G%C3%B6ttingen"
+      }
+   ],
+   "type" : [
+      "http://www.w3.org/2004/02/skos/core#Concept"
+   ],
+   "uri" : "http://d-nb.info/gnd/4021477-1",
+   "url" : "http://www.goettingen.de"
+}

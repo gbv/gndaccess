@@ -13,9 +13,13 @@
       ]
    },
    "startDate" : "1955-10-28",
+   "subjectOf" : [
+      {
+         "url" : "http://de.wikipedia.org/wiki/Bill_Gates"
+      }
+   ],
    "type" : [
       "http://www.w3.org/2004/02/skos/core#Concept"
    ],
-   "uri" : "http://d-nb.info/gnd/119081199",
-   "url" : "http://de.wikipedia.org/wiki/Bill_Gates"
+   "uri" : "http://d-nb.info/gnd/119081199"
 }

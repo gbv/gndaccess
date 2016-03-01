@@ -1,14 +1,18 @@
-# extract build information from control file and changelog
-POPEN  :=(
-PCLOSE :=)
-PACKAGE:=$(shell perl -ne 'print $$1 if /^Package:\s+(.+)/;' < debian/control)
-VERSION:=$(shell perl -ne '/^.+\s+[$(POPEN)](.+)[$(PCLOSE)]/ and print $$1 and exit' < debian/changelog)
-DEPENDS:=$(shell perl -ne 'print $$1 if /^Depends:\s+(.+)/;' < debian/control)
-DEPLIST:=$(shell echo "$(DEPENDS)" | perl -pe 's/(\s|,|[$(POPEN)].+?[$(PCLOSE)])+/ /g')
-ARCH   :=$(shell perl -ne 'print $$1 if /^Architecture:\s+(.+)/;' < debian/control)
-RELEASE:=${PACKAGE}_${VERSION}_${ARCH}.deb
 MAINSRC:=lib/GBV/App/GNDAccess.pm
+CONTROL:=debian/control
 
+# parse debian control file and changelog
+C:=(
+J:=)
+PACKAGE:=$(shell perl -ne 'print $$1 if /^Package:\s+(.+)/;' < $(CONTROL))
+ARCH   :=$(shell perl -ne 'print $$1 if /^Architecture:\s+(.+)/' < $(CONTROL))
+DEPENDS:=$(shell perl -ne '\
+	next if /^\#/; $$p=(s/^Depends:\s*/ / or (/^ / and $$p));\
+	s/,|\n|\([^$J]+\)//mg; print if $$p' < $(CONTROL))
+VERSION:=$(shell perl -ne '/^.+\s+[$C](.+)[$J]/ and print $$1 and exit' < debian/changelog)
+RELEASE:=${PACKAGE}_${VERSION}_${ARCH}.deb
+
+# show configuration
 info:
 	@echo "Release: $(RELEASE)"
 	@echo "Depends: $(DEPENDS)"
@@ -23,26 +27,43 @@ ifeq ($(PANDOC),)
   PANDOC = $(error pandoc is required but not installed)
 endif
 
-documentation: debian/$(PACKAGE).1
-debian/$(PACKAGE).1: README.md debian/control
-	@grep -v '^\[!' $< | $(PANDOC) -s -t man -o $@ \
-		-M title="$(shell echo $(PACKAGE) | tr a-z A-Z)(1) Manual" -o $@
+docs: README.md manpage
+#	cd doc; make dbinfo.pdf
+
+manpage: debian/$(PACKAGE).1
+debian/$(PACKAGE).1: README.md $(CONTROL)
+	@echo "%$(PACKAGE)(1)" Manual | tr a-z A-Z > tmp.md
+	@echo "# NAME" >> tmp.md
+	@echo "dbinfo - Access GND records via HTTP" >> tmp.md
+	@echo >> tmp.md
+	@grep -v '^\[!' $< >> tmp.md
+	@cat tmp.md | $(PANDOC) -s -t man -o $@
+	@rm tmp.md
 
 # build Debian package
-release-file: documentation version
-	carton check
-	carton exec prove -Ilib
+package: manpage version tests
 	dpkg-buildpackage -b -us -uc -rfakeroot
 	mv ../$(PACKAGE)_$(VERSION)_*.deb .
-	git diff-index HEAD # FIXME?
 
-# do cleanup
-debian-clean:
-	fakeroot debian/rules clean
-
-# install required toolchain, Debian packages and Carton
+# install required toolchain and Debian packages
 dependencies:
-	apt-get install fakeroot dpkg-dev
-	apt-get install pandoc libghc-citeproc-hs-data 
-	apt-get install $(DEPLIST)
-	cpanm Carton
+	apt-get -y install fakeroot dpkg-dev debhelper
+	apt-get -y install pandoc libghc-citeproc-hs-data 
+	apt-get -y install $(DEPENDS)
+
+# install required Perl packages
+local: cpanfile
+	cpanm -l local --skip-satisfied --installdeps --notest .
+
+# run locally
+run: local
+	plackup -Ilib -Ilocal/lib/perl5 -r app.psgi
+
+# check sources for syntax errors
+code:
+	@find lib -iname '*.pm' -exec perl -c -Ilib -Ilocal/lib/perl5 {} \;
+
+# run tests
+tests: local
+	PLACK_ENV=tests prove -Ilocal/lib/perl5 -l -v
+

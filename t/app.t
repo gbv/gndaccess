@@ -4,6 +4,7 @@ use Plack::Test;
 use HTTP::Request::Common;
 use JSON;
 use Plack::Util::Load;
+
 my $app = load_app( $ENV{TEST_URL} || 'GBV::App::GNDAccess', verbose => 1 );
 
 test_psgi $app, sub {
@@ -13,15 +14,24 @@ test_psgi $app, sub {
     my $res = $cb->(GET "/abc");
     is $res->code, '404', 'invalid GND identifier';
 
+    $res = $cb->(GET "/$id?format=nt");
+    is $res->code, '200', "/$id?format=nt => 200";
+    ok $res->content;
+
     $res = $cb->(GET "/$id?format=aref");
     is $res->code, '200', "/$id?format=aref => 200";
-    my $aref = JSON->new->decode($res->content);
+    my $aref = JSON->new->decode( $res->content );
     is $aref->{"http://d-nb.info/gnd/$id"}
-            ->{'gnd_preferredNameForThePlaceOrGeographicName'}, "Göttingen@", 'aref';
+            ->{'gnd_preferredNameForThePlaceOrGeographicName'}, 'Göttingen@', 'aref';
 
     $res = $cb->(GET "/$id?format=marcxml");
     is $res->code, '200', "/$id?format=marcxml => 200";
     ok $res->content;
+
+    $res = $cb->(GET "/$id?format=jskos");
+    is $res->code, '200', "/$id?format=jskos => 200";
+    my $jskos = JSON->new->decode($res->content);
+    is $jskos->{prefLabel}{de}, 'Göttingen', 'jskos';
 };
 
 done_testing;
