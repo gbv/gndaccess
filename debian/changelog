@@ -1,3 +1,11 @@
+gndaccess (0.0.7) unstable; urgency=medium
+
+  * Remove experimental support of JSKOS format
+  * Use RDF Turtle from DNB
+  * Fix GND namespace prefix
+
+ -- Jakob Voß <jakob.voss@gbv.de>  Mon, 23 May 2016 10:49:12 +0200
+
 gndaccess (0.0.6) unstable; urgency=medium
 
   * removed RDF formats, added basic JSKOS 
