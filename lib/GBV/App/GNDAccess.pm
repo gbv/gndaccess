@@ -1,7 +1,7 @@
 package GBV::App::GNDAccess;
 use v5.14.1;
 
-our $VERSION="0.0.6";
+our $VERSION="0.0.7";
 our $NAME="gndaccess";
 
 use RDF::aREF;
@@ -116,9 +116,13 @@ sub main {
 
     # RDF-based formats
     if ($format->{rdf}) {
-        my $model = eval { getRDF($uri) };
+        my $model = RDF::Trine::Model->new;
+        eval {
+            my $parser = RDF::Trine::Parser::Turtle->new;
+            $parser->parse_url_into_model( "$uri/about/lds", $model );
+        };
         if ($@ || !$model || !$model->size) {
-            return $self->json(404 => { error => "GND not found via $uri" });
+            return $self->json(404 => { error => "GND not found via $uri: $@" });
         }
 
         if ($format->{rdf} eq 'aref') {
@@ -151,24 +155,6 @@ sub main {
 
     # html
     return [200, ['Content-Type' => 'text/plain'], ['GND gefunden (probier mal format=aref!)']];
-}
-
-sub getRDF {
-    my ($uri) = @_;
-    my $model = RDF::Trine::Model->new;
-
-    # This nasty fix makes sure that RDF is loaded as Unicode.
-    # We could add caching here
-    my $turtle;
-    my $parser = RDF::Trine::Parser::Turtle->new;
-    $parser->parse_url( "$uri/about/lds", sub { }, content_cb => sub { 
-        $turtle = $_[1] } 
-    );
-    my ($fh, $filename) = tempfile();
-    say $fh $turtle;
-    close $fh;
-    $parser->parse_file_into_model( $uri, $filename, $model );
-    return $model;
 }
 
 1;

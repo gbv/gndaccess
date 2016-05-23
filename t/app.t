@@ -11,7 +11,10 @@ test_psgi $app, sub {
     my $cb = shift;
     my $id = '4021477-1';
 
-    my $res = $cb->(GET "/abc");
+    my $res = $cb->(GET "/");
+    is $res->code, 200, 'HTML base page';
+
+    $res = $cb->(GET "/abc");
     is $res->code, '404', 'invalid GND identifier';
 
     $res = $cb->(GET "/$id?format=nt");
