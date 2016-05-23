@@ -22,16 +22,13 @@ test_psgi $app, sub {
     is $res->code, '200', "/$id?format=aref => 200";
     my $aref = JSON->new->decode( $res->content );
     is $aref->{"http://d-nb.info/gnd/$id"}
-            ->{'gnd_preferredNameForThePlaceOrGeographicName'}, 'Göttingen@', 'aref';
+            ->{'gnd_preferredNameForThePlaceOrGeographicName'},
+            'Göttingen@',
+            'aref';
 
     $res = $cb->(GET "/$id?format=marcxml");
     is $res->code, '200', "/$id?format=marcxml => 200";
     ok $res->content;
-
-    $res = $cb->(GET "/$id?format=jskos");
-    is $res->code, '200', "/$id?format=jskos => 200";
-    my $jskos = JSON->new->decode($res->content);
-    is $jskos->{prefLabel}{de}, 'Göttingen', 'jskos';
 };
 
 done_testing;

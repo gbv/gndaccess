@@ -26,20 +26,10 @@ sub formats {
             type => 'application/json', 
             rdf  => 'aref',
         },
-        jskos => { 
-            name => 'JSKOS', 
-            type => 'application/json', 
-            rdf => 'jskos',
-        },
         marcxml => {
             name => 'MARCXML',
             type => 'application/marcxml+xml',
             marc => 'marcxml'
-        },
-        nt => { 
-            name => 'NTriples', 
-            type => 'application/n-triples',
-            rdf  => 'NTriples',
         },
         rdfxml => { 
             name => 'RDF/XML', 
@@ -132,12 +122,8 @@ sub main {
         }
 
         if ($format->{rdf} eq 'aref') {
-            my $aref = encode_aref $model, NFC => 1;
+            my $aref = encode_aref $model, NFC => 1, ns => '2015-01-01';
             return $self->json( 200, $aref );
-        } elsif ($format->{rdf} eq 'jskos') {
-            my $aref = encode_aref $model, NFC => 1;
-            my $jskos = gndaref2jskos($aref, $uri);
-            return $self->json( 200, $jskos );
         } elsif ($format->{rdf}) {
             use Encode qw(decode_utf8);
             my $rdf = RDF::Trine::Serializer->new($format->{rdf})
@@ -173,84 +159,16 @@ sub getRDF {
 
     # This nasty fix makes sure that RDF is loaded as Unicode.
     # We could add caching here
-    my $rdfxml;
-    my $parser = RDF::Trine::Parser::RDFXML->new;
-    $parser->parse_url( $uri, sub { }, content_cb => sub { 
-        $rdfxml = $_[1] } 
+    my $turtle;
+    my $parser = RDF::Trine::Parser::Turtle->new;
+    $parser->parse_url( "$uri/about/lds", sub { }, content_cb => sub { 
+        $turtle = $_[1] } 
     );
     my ($fh, $filename) = tempfile();
-    say $fh $rdfxml;
+    say $fh $turtle;
     close $fh;
     $parser->parse_file_into_model( $uri, $filename, $model );
-
     return $model;
-}
-
-sub gndaref2jskos {
-    my ($aref, $uri) = @_;
-    my $jskos = {
-        uri => $uri,
-        type => ['http://www.w3.org/2004/02/skos/core#Concept'],
-        '@context' => 'https://gbv.github.io/jskos/context.json',
-    };
-    my $tmp = aref_query_map $aref, $uri, {
-        'gnd_homepage.' => 'url',
-        'foaf_page.' => 'subjectOf',
-        'gnd_associatedDate^xs_date' =>  'relatedDate',
-        'gnd_beginningOfPeriod^xs_date' =>  'startDate',
-        'gnd_biographicalOrHistoricalInformation@' => 'scopeNote',
-        'gnd_dateOfBirth^xs_date' =>  'startDate',
-        'gnd_dateOfDeath^xs_date' =>  'endDate',
-        'gnd_preferredNameForThePerson@' => 'prefLabel',
-        'gnd_variantNameForTheSubjectHeading' => 'altLabel',
-        'owl_sameAs.' => 'identifier',
-        'gnd_broader.' => 'broader',
-        'gnd_broaderTermInstantial.' => 'broader',
-        'gnd_corporateBodyIsMember' => 'broader',
-        'gnd_dateOfEstablishment' => 'startDate',
-        'gnd_dateOfProduction' => 'startDate',
-        'gnd_dateOfPublication' => 'startDate',
-        'gnd_dateOfTermination' => 'endDate',
-        'gnd_endOfPeriod' => 'endDate',
-        'gnd_definition' => 'definition',
-        'gnd_preferredNameForTheSubjectHeading@' => 'prefLabel',
-        'gnd_relatedPlaceOrGeographicName' => 'related',
-        'gnd_preferredNameForThePlaceOrGeographicName@' => 'prefLabel',
-        'gnd_variantNameForThePlaceOrGeographicName@' => 'altLabel',
-    };
-    my $list  = sub { (ref $_[0] or !defined $_[0]) ? $_[0] : [$_[0]] };  # get a list
-    my $value = sub { ref $_[0] ? $_[0][0] : $_[0] }; # get a single value
-
-    foreach (qw(url startDate endDate relatedDate)) {
-        $jskos->{$_} = $value->($tmp->{$_});
-    }
-
-    foreach (qw(altLabel scopeNote)) {
-        my $values = $list->($tmp->{$_}) // next;
-        $jskos->{$_} = { "de" => [ sort @$values ] };
-    }
-
-    foreach (qw(identifier)) {
-        my $values = $list->($tmp->{$_}) // next;
-        $jskos->{$_} = [ sort @$values ];
-    }
-
-    foreach (qw(broader related narrower previous next)) {
-        my $values = $list->($tmp->{$_}) // next;
-        $jskos->{$_} = [ map { { uri => $_ } } sort @$values ];
-    }
-
-    foreach (qw(subjectOf)) {
-        my $values = $list->($tmp->{$_}) // next;
-        $jskos->{$_} = [ map { { url => $_ } } sort @$values ];
-    }
-    
-    $jskos->{prefLabel} = { "de" => $value->($tmp->{prefLabel}) } if defined $tmp->{prefLabel};
-
-
-    delete $jskos->{$_} for grep { !defined $jskos->{$_} } keys %$jskos;
-
-    return $jskos;
 }
 
 1;
