@@ -31,7 +31,8 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: TVPV2HwXkCKZNqZ28Xn9sTF/bdU3wEpS0kGDWp2Jc1k2fwe0JW6I8XfoFw6XeGV1iQkXbZEQnXk0X/cudav6/SIRkVA/0Q5gcrucbDwzFlUA1Q70Na4bspcUQCiaiHWehLwHKxHOfgH7OVepSd++dPAmMWquIyK9V7Rx8JvvpsI=
+    secure: HxrhPlZXF728GXYjbv4FwBtApP8EcJXPYVCR9C6vjL3kMYdA5U4VF5iQ4dVupAVeaqzh4kz+5skG0mFk1IKywHy5DqV+YmHGCYYt0yhzHcK5G+qDzaaYtySzn9CWZKywFDEDVWFTPYYciWnnXTyDLb3l0jwlEXpMPOBFejO0TnI=
   file: "${RELEASE_FILE}"
   on:
     tags: true
+    repo: gbv/gndaccess
